@@ -38,7 +38,7 @@ Our tool takes a novel approach to text sanitization that takes into account bot
 
 ## Setup and Installation
 
-Our tool is provided as a Docker container for ease of deployment. You can find our Docker image on [Docker Hub](<Docker-Hub-Link-Here>). You may also clone the entire source code and our fine-tuned models from this repository. To get started, follow the instructions in our [Setup and Installation guide](<Your-Installation-Guide-Link-Here>).
+Our tool is provided as a Docker container for ease of deployment. You can find our Docker image on [Docker Hub](https://hub.docker.com/r/dimitristaufer/implementation_docker-web). You may also clone the entire source code and our fine-tuned models from this repository. To get started, follow the instructions in our [Dockerfile](https://github.com/dimitristaufer/Semi-Automated-Text-Sanitization/blob/main/Dockerfile).
 
 ## Future Work
 
