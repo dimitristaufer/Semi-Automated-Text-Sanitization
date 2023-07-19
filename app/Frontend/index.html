@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Interactive Text Sanitization</title>
+    <meta name="author" content="Dimitri Staufer">
+    <meta name="description"
+        content="The frontend part of my master thesis implementation for a semi-automated text sanitization pipeline to mitigate the risk of whistleblower re-identification.">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="style.css">
+
+</head>
+
+<body>
+
+    <!-- App darkener overlay when the side navigation is visible -->
+    <div id="overlay" class="overlay"></div>
+
+    <!-- App darkener overlay when the server is offline -->
+    <div id="overlay-offline" class="overlay">
+        <p>Server offline. Please start the server using <i>python server.py</i>.</p>
+    </div>
+
+    <!-- App darkener overlay when too many clients are connected -->
+    <div id="overlay-clients" class="overlay">
+        <p>Too many clients connected <span class="current-mode">(1 client allowed)</span>.</p>
+    </div>
+
+    <!-- App darkener overlay when the server is loading a model -->
+    <div id="overlay-model-loading" class="overlay">
+        <p>Loading the language model into memory...</p>
+    </div>
+
+    <!-- “Hamburger“ Menu -->
+    <div id="hamburger">
+        <div class="slice"></div>
+        <div class="slice"></div>
+    </div>
+
+    <!-- Side Navigation -->
+    <div class="side-menu">
+
+        <div class="section">
+            <h3>Language Model</h3>
+            <div class="menu-item">
+                <div class="tooltip">
+                    <label for="FLAN_T5_Base" class="switch-label">FLAN T5 Base</label>
+                    <span class="tooltiptext">
+                        FLAN T5 Base has 250M parameters, i.e. learnable weights and uses around 0.9 GB of memory. It usually takes no more than a few seconds to load the model into memory.
+                    </span>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" id="FLAN_T5_Base" checked>
+                    <span class="slider round"></span>
+                </label>
+            </div>
+
+            <div class="menu-item">
+                <div class="tooltip">
+                    <label for="FLAN_T5_XL" class="switch-label">FLAN T5 XL</label>
+                    <span class="tooltiptext">
+                        FLAN T5 XL has 3B parameters, i.e. learnable weights and uses around 10.6 GB of memory. It can take up to 2 minutes to load the model into memory.
+                    </span>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" id="FLAN_T5_XL">
+                    <span class="slider round"></span>
+                </label>
+            </div>
+
+            <p id="memory-usage">Memory usage: XX.XX GB / XX.XX GB</p>
+        </div>
+
+        <div class="section">
+            <h3>Hyperparameters</h3>
+            <div class="menu-item temperature">
+                <div class="tooltip">
+                    <label for="temperature" class="switch-label">Temperature</label>
+                    <span class="tooltiptext">
+                        'Temperature' is a hyperparameter of neural networks used to control the randomness of predictions
+                        by scaling the logits before applying softmax. Higher values (e.g., 1.0) increase randomness,
+                        while lower values make the predictions more deterministic.
+                    </span>
+                </div>
+                <input type="range" id="temperature" min="0.1" max="1.5" step="0.1" value="0.5">
+                <span id="temperature-value">0.5</span>
+            </div>
+
+            <div class="menu-item">
+                <div class="tooltip">
+                    <label for="no-repeat-bigram" class="switch-label">No-Repeat Bigrams</label>
+                    <span class="tooltiptext">
+                        If enabled, 'no_repeat_ngram_size' is set to 2 during model inference. This means that the same
+                        bigram (i.e. two tokens following each other) will not be repeated in the generated text. This
+                        helps avoid repetitive phrases, but it causes the model to stop generating with longer texts
+                        (because it is out of options).
+                    </span>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" id="no-repeat-bigram">
+                    <span class="slider round"></span>
+                </label>
+            </div>
+
+            <div class="menu-item">
+                <div class="tooltip">
+                    <label for="extreme-length-penalty" class="switch-label">Extreme Length Penalty</label>
+                    <span class="tooltiptext">
+                        If enabled, 'length_penalty' is set to minus infinity during model inference. This means that we
+                        apply an infinetly large penalty, if the model exceeds the text length of the input. Enabling
+                        this may help against hallucination, but may produce very short summaries of the input text.
+                    </span>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" id="extreme-length-penalty">
+                    <span class="slider round"></span>
+                </label>
+            </div>
+        </div>
+
+        <footer>
+            <p>Author: Dimitri Staufer</p>
+            <p><a href="mailto:staufer@tu-berlin.de">staufer@tu-berlin.de</a></p>
+        </footer>
+
+    </div>
+
+    <div id="app-container-shadow"></div>
+
+    <!-- The main app container for the sanitization process -->
+    <div id="app-container">
+        <!-- The tag section for the original text and sanitzed text -->
+        <div class="tabs">
+            <div class="tabcontainer">
+                <div class="invisible-flex-item"></div>
+                <h2 id="originalHeader" class="tabtitle">Original <span class="current-mode">(write mode)</span></h2>
+                <label class="switch">
+                    <input id="toggle-mode" type="checkbox">
+                    <span class="slider round" id="switch-slider"></span>
+                </label>
+            </div>
+            <div class="tabcontainer">
+                <div class="invisible-flex-item"></div>
+                <h2 id="sanitized-header" class="tabtitle">Sanitized</h2>
+                <div class="invisible-flex-item"></div>
+            </div>
+        </div>
+
+        <!-- The content below the tab section (original text, sanitized text) -->
+        <div class="tabcontentwrapper">
+            <div id="original-content" class="tabcontent">
+                <div id="original-input" contenteditable="true" autofocus="true"></div>
+            </div>
+
+            <div id="sanitized-content" class="tabcontent">
+
+                <div id="sanitized-content-overlay"></div>
+                <div id="sanitized-content-status">
+                    <p>Press the <i>Sanitize</i> button to start.</p>
+                </div>
+
+                <p id="sanitized-text"></p>
+            </div>
+        </div>
+
+        <!-- Sanitize Button (starts the sanitization process) -->
+        <button id="sanitize-button">Sanitize</button>
+
+    </div>
+
+    <!-- JavaScript -->
+    <script src="https://cdn.socket.io/4.6.0/socket.io.min.js" integrity="sha384-c79GN5VsunZvi+Q/WObgk2in0CbZsHnjEqvFxC5DxHn9lTfNce2WW6h2pH6u/kF+" crossorigin="anonymous"></script>
+    <script src="utils.js"></script>
+    <script src="anim.js"></script>
+    <script src="main.js"></script>
+</body>
+
+</html>

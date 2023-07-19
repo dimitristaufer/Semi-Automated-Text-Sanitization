@@ -1,0 +1,54 @@
+server {
+    # Listen on port 80
+    listen 80;
+    server_name ${SERVER_NAME};
+    location / {
+        # Redirect HTTP requests to HTTPS permanently
+        return 301 https://$host$request_uri;
+    }
+}
+
+server {
+    # Listen on port 443 with SSL enabled
+    listen 443 ssl;
+    server_name ${SERVER_NAME};
+
+    # Specify the SSL certificate and private key
+    ssl_certificate ${CERT_PATH};
+    ssl_certificate_key ${KEY_PATH};
+
+    # Serving the frontend application
+    location / {
+        # Define the root directory for this location block
+        root /app/Frontend/;
+        try_files $uri $uri/ /index.html;
+    }
+
+    # Common proxy settings
+    proxy_redirect off;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+
+    # Reverse proxy for the WebSocket connection
+    location /socket.io/ {
+        proxy_pass http://localhost:3050;
+
+        # WebSocket support
+        proxy_http_version 1.1; # Use HTTP/1.1 for the proxy connection
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_buffering off;
+        proxy_read_timeout 86400;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+    }
+
+    # Reverse proxy for the backend
+    location /backend/ {
+        proxy_pass http://localhost:3050;
+
+        # Increase the timeout to 3 minutes, because loading the model into memory may take a while
+        proxy_read_timeout 180;
+    }
+}

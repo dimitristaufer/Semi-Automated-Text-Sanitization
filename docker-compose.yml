@@ -1,0 +1,12 @@
+services:
+  web:  # Service name
+    platform: linux/amd64  # The architecture the service runs on
+    build: .  # Build the Dockerfile in the current directory
+    volumes:  # Define the storage volumes for the service
+      - ./app:/app  # Mount the local directory ./app to /app in the container
+      - /etc/letsencrypt:/etc/letsencrypt  # Mount the local directory /etc/letsencrypt to the same directory in the container
+    ports:  # Expose ports to the host machine
+      - "80:80"  # Map port 80 of the host to port 80 in the container
+      - "443:443"  # Map port 443 of the host to port 443 in the container
+      - "3050:3050"  # Map port 3050 of the host to port 3050 in the container
+    restart: unless-stopped  # Restart policy for the service (restarts the service unless it was manually stopped)

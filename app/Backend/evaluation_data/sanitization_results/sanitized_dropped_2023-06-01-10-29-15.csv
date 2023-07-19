@@ -1,0 +1,2 @@
+author_id,textLanguageQualityFRE,textLanguageQualityFKGL,textLength,textSanitizedLength,textWordCount,textSanitizedWordCount,tokenizerId,model_id,processingTime,FREloss,FKGLloss,semanticSimilarity,utilityLoss,textPropnCount,textNounmodCount,textNounCount,textNamedEntityCount,textSanitizedLanguageQualityFRE,textSanitizedLanguageQualityFKGL
+0,59.23,10.1,1469,371,231,52,google/flan-t5-xl,declare-lab/flan-alpaca-xl,51.9469199180603,0.15499999999999997,0.08999999999999997,0.6235462427139282,0.06400964781931417,19,30,44,18,43.73,11.9
