@@ -191,10 +191,15 @@ def stream_generated_text():
         socketio.emit("status", {"text": f"{step_message}: {soup.text}"})
 
     text_for_paraphrasing = soup.text
+
+    text_for_paraphrasing = " ".join(text_for_paraphrasing.split()) # remove duplicate spaces, because this prevented dependent phrase removal
+
     print(f"text after normal ops: {text_for_paraphrasing}")
     print(sentences_with_phrases_to_remove)
     for entry in sentences_with_phrases_to_remove:
-        text_for_paraphrasing = text_for_paraphrasing.replace(entry['sentence'], utils.remove_dependent_phrases(entry['sentence'], entry['entity']))
+        sentence = " ".join(str(entry['sentence']).split())
+        entity = " ".join(str(entry['entity']).split())
+        text_for_paraphrasing = text_for_paraphrasing.replace(sentence, utils.remove_dependent_phrases(sentence, entity))
 
     if text_for_paraphrasing == "":
         socketio.emit("generated_text", {"text": "(Text is to short to be sanitized)"})
