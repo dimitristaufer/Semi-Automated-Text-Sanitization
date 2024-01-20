@@ -2,6 +2,7 @@ services:
   web:  # Service name
     platform: linux/amd64  # The architecture the service runs on
     build: .  # Build the Dockerfile in the current directory
+    image: ghcr.io/dimitristaufer/semi-automated-text-sanitization
     volumes:  # Define the storage volumes for the service
       - ./app:/app  # Mount the local directory ./app to /app in the container
       - /etc/letsencrypt:/etc/letsencrypt  # Mount the local directory /etc/letsencrypt to the same directory in the container

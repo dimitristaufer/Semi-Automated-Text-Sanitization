@@ -17,6 +17,7 @@ from sentence_transformers.util import pytorch_cos_sim
 from transformers import pipeline, AutoTokenizer, BertTokenizer
 from scipy.special import kl_div
 from peft import PeftConfig
+import torch
 
 '''
 Start Screen:
@@ -39,9 +40,11 @@ Ctrl+A then Esc
 nlp = spacy.load("en_core_web_lg")
 
 # Load SentenceTransformer model
-model = SentenceTransformer('all-MiniLM-L12-v2')
+model = SentenceTransformer('all-mpnet-base-v2')
 
 # Load sentiment analysis pipeline (pipeline, by default only returns the label with the highest score! But we can use top_k=None to get all)
+#device = torch.cuda.current_device()
+#sentiment_model = pipeline('sentiment-analysis', model="nlptown/bert-base-multilingual-uncased-sentiment", device=device)
 sentiment_model = pipeline('sentiment-analysis', model="nlptown/bert-base-multilingual-uncased-sentiment", device="mps")
 sentiment_tokenizer = BertTokenizer.from_pretrained('nlptown/bert-base-multilingual-uncased-sentiment')
 
@@ -53,18 +56,8 @@ tokenizer = AutoTokenizer.from_pretrained(tokenizer_id)
 # So we can have progress bars when performing heavy pandas operations
 tqdm.pandas()
 
+
 def automaticSanitization(text, temperature=0.5):
-    """
-    This function simulates a sanitization pipeline, as if it were used with the front end.
-
-    Parameters:
-    text (str): The text to be sanitized.
-    temperature (float, optional): The temperature parameter for FLAN T5. Default is 0.5.
-
-    Returns:
-    tuple: Returns sanitized text and time elapsed during sanitization.
-    """
-
     start_time = time.time()  # Start measuring time
 
     tokenizationHTML = utils.tokenize_return_positions(text)
@@ -156,53 +149,47 @@ def automaticSanitization(text, temperature=0.5):
 
     return final_text, elapsed_time
 
+
+
+"""
+Flesch Reading Ease Score: The Flesch Reading Ease Score provides a numerical value between 0 and 100, representing the readability of the text. Higher scores indicate easier-to-read text, while lower scores suggest more complex and difficult-to-understand content. This metric considers factors like sentence length and average syllables per word. The advantage of using this metric is that it gives a general assessment of how readable the sanitized text is, making it suitable for a wide range of applications.
+
+The Flesch Reading Ease Score measures how easy or difficult a text is to read. It assigns a numerical score ranging from 0 to 100, with higher scores indicating easier readability. The general value ranges for Flesch Reading Ease Score are as follows:
+90-100: Very easy to read. Easily understood by an average 11-year-old student or above.
+80-89: Easy to read. Conversational English for consumers.
+70-79: Fairly easy to read. Understandable to 13- to 15-year-old students.
+60-69: Plain English. Understandable to 15- to 16-year-old students.
+50-59: Fairly difficult to read. Understandable to 16- to 18-year-old students.
+30-49: Difficult to read. Understandable to college graduates.
+0-29: Very difficult to read. Best understood by university graduates.
+
+Flesch-Kincaid Grade Level: The Flesch-Kincaid Grade Level estimates the U.S. grade level required to understand the text. This metric is beneficial when you want a more specific measure of text complexity, particularly in educational contexts. By indicating the grade level, it helps you understand the reading difficulty in terms of the education system. For instance, a grade level of 8.0 means that an eighth-grader should be able to understand the text. This information can be valuable if you're targeting specific audiences or aiming for certain readability standards.
+
+The Flesch-Kincaid Grade Level estimates the grade level required to understand a particular piece of text. It provides a numerical value that corresponds to a grade level. The general value ranges for Flesch-Kincaid Grade Level are as follows:
+0-1: Very easy. Suitable for early readers (typically kindergarten to first grade).
+2-3: Easy. Suitable for early elementary school students (typically second to third grade).
+4-5: Fairly easy. Suitable for late elementary school students (typically fourth to fifth grade).
+6-8: Plain English. Suitable for middle school students (typically sixth to eighth grade).
+9-10: Fairly difficult. Suitable for high school students (typically ninth to tenth grade).
+11-12: Difficult. Suitable for late high school students (typically eleventh to twelfth grade).
+13-15: Very difficult. Suitable for college-level readers.
+
+"""
+
+#!!! We also should measure per author_id, the authorship attribution accuracy VS the degradation in text quality (i.e. for semanticSimilarity, utilityLoss, textLanguageQuality)
+
 def save_dataframe(df, filename, cols_to_drop=[]):
-    """
-    This function saves the dataframe to a csv file.
-
-    Parameters:
-    df (pandas.DataFrame): The dataframe to be saved.
-    filename (str): The output filename.
-    cols_to_drop (list, optional): A list of columns to be dropped. Default is an empty list.
-
-    Returns:
-    None
-    """
-
     # Drop specified columns if they exist in dataframe
     cols_to_drop = [col for col in cols_to_drop if col in df.columns]
     df = df.drop(columns=cols_to_drop)
     df.to_csv(filename, index=False)
 
 def generate_filename(prefix, outPath):
-    """
-    This function generates a filename with a timestamp.
-
-    Parameters:
-    prefix (str): The prefix for the filename.
-    outPath (str): The output path for the file.
-
-    Returns:
-    str: Returns the filename as a string.
-    """
-
     datestamp = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
     filename = outPath + "/" + prefix + datestamp + ".csv"
     return filename
 
 def sanitizeImdb62(inCSVPath, outPath, checkpointFile="evaluation_data/checkpoint.csv"):
-    """
-    This function sanitizes a csv file of the IMDb62 dataset
-
-    Parameters:
-    inCSVPath (str): The input path for the csv file.
-    outPath (str): The output path for the sanitized csv file.
-    checkpointFile (str, optional): The file path for the checkpoint csv file. Default is "evaluation_data/checkpoint.csv".
-
-    Returns:
-    None: This function does not return any value but writes the results to an output CSV file.
-    """
-
     # Read the CSV file
     df = pd.read_csv(inCSVPath) # len = 12370
 
@@ -246,7 +233,7 @@ def sanitizeImdb62(inCSVPath, outPath, checkpointFile="evaluation_data/checkpoin
         df_checkpoint = pd.DataFrame(columns=df.columns)
         # Save the initial state as checkpoint
         df_checkpoint.to_csv(checkpointFile, index=False)
-        start_idx = 0
+        start_idx = 165 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
     print(f"Starting process from index {start_idx} out of {len(df)}, this might take a while...")
     for i in tqdm(range(start_idx, len(df))):
@@ -341,19 +328,6 @@ def sanitizeImdb62(inCSVPath, outPath, checkpointFile="evaluation_data/checkpoin
 
 
 def evaluateResults(inCSVPath, outPath):
-    """
-    Reads a CSV file and evaluates various metrics present in the CSV file by calculating their
-    aggregate statistics including mean, median, standard deviation, minimum, and maximum values.
-    The calculated statistics are then saved to a new CSV file.
-
-    Parameters:
-    inCSVPath (str): The path to the input CSV file.
-    outPath (str): The path to the output directory where the results will be written to.
-
-    Returns:
-    None: This function does not return any value but writes the results to an output CSV file.
-    """
-
     # Read the CSV file
     df = pd.read_csv(inCSVPath)
 
@@ -383,4 +357,15 @@ def evaluateResults(inCSVPath, outPath):
 
 
 #sanitizeImdb62("evaluation_data/imdb62_AA_test.csv", "evaluation_data/sanitization_results")
-#evaluateResults("", "evaluation_data/sanitization_results")
+
+evaluateResults("checkpoint.csv", "evaluation_data/sanitization_results")
+
+
+'''
+
+Text Length and Processing Time: The longer the original text, the more time it might take for processing. So, you would expect a positive correlation between textLength and processingTime.
+Sanitized Word Count and Text Quality: The sanitized text quality (both textSanitizedLanguageQualityFRE and textSanitizedLanguageQualityFKGL) might be related to the sanitized word count (textSanitizedWordCount). It would be interesting to see if a larger sanitized word count leads to a higher or lower quality score.
+Original Text Quality and Sanitized Text Quality: If the sanitation process is well done, you would expect a positive correlation between the original text quality (FRE and FKGL) and the sanitized text quality. In other words, if the original text has a high quality score, the sanitized text should also have a high quality score.
+Language Quality and Semantic Similarity: You might expect that the closer the language quality of the original text and the sanitized text (reflected by FREloss and FKGLloss), the higher the semantic similarity between the original and sanitized texts.
+
+'''

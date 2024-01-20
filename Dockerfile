@@ -20,13 +20,13 @@
 
 ### Docker Stuff ###
 
-# Build image "image implementation_docker-web:latest":
+# Build image "ghcr.io/dimitristaufer/semi-automated-text-sanitization:latest":
 # docker-compose build
 
-# Create container "text_san" and run it from "image implementation_docker-web:latest" with SSL:
-# docker run --name text_san -p 80:80 -p 443:443 -p 3050:3050 -v /etc/letsencrypt:/etc/letsencrypt -e SERVER_NAME=textsan.dimitristaufer.com -e CERT_PATH=/etc/letsencrypt/live/textsan.dimitristaufer.com/fullchain.pem -e KEY_PATH=/etc/letsencrypt/live/textsan.dimitristaufer.com/privkey.pem implementation_docker-web:latest
-# Create container "text_san" and run it from "image implementation_docker-web:latest" without SSL:
-# docker run --name text_san -p 80:80 -p 443:443 -p 3050:3050 implementation_docker-web:latest
+# Create container "text_san" and run it from "ghcr.io/dimitristaufer/semi-automated-text-sanitization:latest" with SSL:
+# docker run --name text_san -p 80:80 -p 443:443 -p 3050:3050 -v /etc/letsencrypt:/etc/letsencrypt -e SERVER_NAME=textsan.dimitristaufer.com -e CERT_PATH=/etc/letsencrypt/live/textsan.dimitristaufer.com/fullchain.pem -e KEY_PATH=/etc/letsencrypt/live/textsan.dimitristaufer.com/privkey.pem ghcr.io/dimitristaufer/semi-automated-text-sanitization:latest
+# Create container "text_san" and run it from "ghcr.io/dimitristaufer/semi-automated-text-sanitization:latest" without SSL:
+# docker run --name text_san -p 80:80 -p 443:443 -p 3050:3050 ghcr.io/dimitristaufer/semi-automated-text-sanitization:latest
 
 # Stop the container:
 # docker stop text_san
