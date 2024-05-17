@@ -1,4 +1,3 @@
-# Semi-Automated Text Sanitization Tool
 [![CC BY-NC-ND 4.0][cc-by-nc-nd-shield]][cc-by-nc-nd]
 
 The primary motivation behind our tool is to mitigate the risk of whistleblower re-identification.
