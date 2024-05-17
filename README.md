@@ -1,16 +1,15 @@
 # Semi-Automated Text Sanitization Tool
-[![CC BY-ND 4.0][cc-by-nd-shield]][cc-by-nd]
+[![CC BY-NC-ND 4.0][cc-by-nc-nd-shield]][cc-by-nc-nd]
 
 The primary motivation behind our tool is to mitigate the risk of whistleblower re-identification.
 
-Read our paper for more details.
+Read [our paper](https://arxiv.org/abs/2405.01097) for more details. We were accepted for publication at the ACM Conference on Fairness, Accountability, and Transparency 2024 (ACM FAccT'24). The link leads to a preprint manuscript on arXiv.
 
 ```
-@inproceedings{staufer2024silencing,
+@article{staufer2024silencing,
   title={Silencing the Risk, Not the Whistle: A Semi-automated Text Sanitization Tool for Mitigating the Risk of Whistleblower Re-Identification},
   author={Staufer, Dimitri and Pallas, Frank and Berendt, Bettina},
-  booktitle={Proceedings of the 2024 ACM Conference on Fairness, Accountability, and Transparency},
-  pages={XXX--XXX},
+  journal={arXiv preprint arXiv:2405.01097},
   year={2024}
 }
 ```
@@ -18,10 +17,10 @@ Read our paper for more details.
 ## License
 
 This work is licensed under a
-[Creative Commons Attribution-NoDerivs 4.0 International License][cc-by-nd].
+[Creative Commons Attribution-NonCommercial-NoDerivs 4.0 International License][cc-by-nc-nd].
 
-[![CC BY-ND 4.0][cc-by-nd-image]][cc-by-nd]
+[![CC BY-NC-ND 4.0][cc-by-nc-nd-image]][cc-by-nc-nd]
 
-[cc-by-nd]: https://creativecommons.org/licenses/by-nd/4.0/
-[cc-by-nd-image]: https://licensebuttons.net/l/by-nd/4.0/88x31.png
-[cc-by-nd-shield]: https://img.shields.io/badge/License-CC%20BY--ND%204.0-lightgrey.svg
+[cc-by-nc-nd]: https://creativecommons.org/licenses/by-nc-nd/4.0/
+[cc-by-nc-nd-image]: https://licensebuttons.net/l/by-nc-nd/4.0/88x31.png
+[cc-by-nc-nd-shield]: https://img.shields.io/badge/License-CC%20BY--NC--ND%204.0-lightgrey.svg
